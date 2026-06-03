@@ -1,0 +1,39 @@
+{
+  "tests": [
+    {
+      "name": "GET all routes",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": { "routes": [] },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "GET routes filtered by from",
+      "method": "GET",
+      "path": "/?from=Москва",
+      "expectedStatus": 200,
+      "expectedBody": { "routes": [] },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST create route",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "driver_name": "Тест Тестов",
+        "car": "Toyota Camry",
+        "from_city": "Москва",
+        "to_city": "Казань",
+        "price": 1500,
+        "seats": 2,
+        "trip_date": "Сегодня",
+        "trip_time": "10:00",
+        "comment": "Тест"
+      },
+      "expectedStatus": 201,
+      "expectedBody": { "ok": true },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

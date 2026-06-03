@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import CityInput from "@/components/app/CityInput";
+import { createRoute } from "@/api/routes";
 
 interface Route {
   id: string;
@@ -25,6 +26,7 @@ const CARS = ["Toyota Camry", "Hyundai Solaris", "Kia Rio", "Lada Vesta", "Volks
 
 export default function PublishRoute({ onClose, onPublish }: PublishRouteProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [saving, setSaving] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState("Сегодня");
@@ -39,15 +41,31 @@ export default function PublishRoute({ onClose, onPublish }: PublishRouteProps) 
   const canStep2 = date && time && seats > 0;
   const canStep3 = price && parseInt(price) > 0;
 
-  const handlePublish = () => {
-    const route: Route = {
-      id: `RM-${Math.floor(1000 + Math.random() * 9000)}`,
-      from, to, price: parseInt(price),
-      seats, time, date, comment, car,
-      status: "active",
-    };
-    setPublished(true);
-    if (onPublish) onPublish(route);
+  const handlePublish = async () => {
+    setSaving(true);
+    try {
+      const result = await createRoute({
+        driver_name: "Александр Громов",
+        car,
+        from_city: from,
+        to_city: to,
+        price: parseInt(price),
+        seats,
+        trip_date: date,
+        trip_time: time,
+        comment,
+      });
+      const route: Route = {
+        id: `RM-${result.id}`,
+        from, to, price: parseInt(price),
+        seats, time, date, comment, car,
+        status: "active",
+      };
+      setPublished(true);
+      if (onPublish) onPublish(route);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (published) {
@@ -315,10 +333,15 @@ export default function PublishRoute({ onClose, onPublish }: PublishRouteProps) 
             </button>
             <button
               onClick={handlePublish}
-              disabled={!canStep3}
-              className="btn-gradient flex-1 py-3 rounded-2xl text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed"
+              disabled={!canStep3 || saving}
+              className="btn-gradient flex-1 py-3 rounded-2xl text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Опубликовать
+              {saving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Публикуем...
+                </>
+              ) : "Опубликовать"}
             </button>
           </div>
         </div>
