@@ -1,17 +1,28 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { UserRole } from "@/pages/Index";
+import CityInput from "@/components/app/CityInput";
 
 interface SearchPageProps {
   role: UserRole;
 }
 
 const allRoutes = [
-  { from: "Москва, Арбат", to: "Шереметьево", price: 850, seats: 2, time: "09:30", date: "Сегодня", driver: "Алексей К.", rating: 4.8, car: "Toyota Camry • А001МВ" },
-  { from: "Москва, ВДНХ", to: "Домодедово", price: 1100, seats: 3, time: "10:15", date: "Сегодня", driver: "Марина Р.", rating: 4.9, car: "Hyundai Solaris • В234СТ" },
-  { from: "Сокольники", to: "Внуково", price: 620, seats: 1, time: "11:00", date: "Сегодня", driver: "Дмитрий В.", rating: 4.7, car: "Kia Rio • С567УФ" },
-  { from: "Центр", to: "Санкт-Петербург", price: 2800, seats: 2, time: "14:00", date: "Завтра", driver: "Иван М.", rating: 5.0, car: "Mercedes E-Class • Е890КЛ" },
-  { from: "Москва, Юг", to: "Воронеж", price: 1600, seats: 4, time: "06:00", date: "Завтра", driver: "Ольга С.", rating: 4.6, car: "Volkswagen Polo • Н123АВ" },
+  { from: "Москва", to: "Санкт-Петербург", price: 2800, seats: 2, time: "14:00", date: "Сегодня", driver: "Иван М.", rating: 5.0, car: "Mercedes E-Class • Е890КЛ" },
+  { from: "Москва", to: "Казань", price: 1900, seats: 3, time: "08:00", date: "Сегодня", driver: "Алексей К.", rating: 4.8, car: "Toyota Camry • А001МВ" },
+  { from: "Москва", to: "Нижний Новгород", price: 1200, seats: 2, time: "10:30", date: "Сегодня", driver: "Марина Р.", rating: 4.9, car: "Hyundai Solaris • В234СТ" },
+  { from: "Москва", to: "Воронеж", price: 1600, seats: 4, time: "06:00", date: "Завтра", driver: "Ольга С.", rating: 4.6, car: "Volkswagen Polo • Н123АВ" },
+  { from: "Санкт-Петербург", to: "Москва", price: 2700, seats: 1, time: "09:00", date: "Сегодня", driver: "Дмитрий В.", rating: 4.7, car: "Kia Rio • С567УФ" },
+  { from: "Санкт-Петербург", to: "Великий Новгород", price: 800, seats: 3, time: "11:00", date: "Сегодня", driver: "Елена К.", rating: 4.9, car: "Skoda Octavia • Р123АА" },
+  { from: "Казань", to: "Уфа", price: 1100, seats: 2, time: "07:30", date: "Завтра", driver: "Рустам М.", rating: 4.8, car: "Lada Vesta • Т456БВ" },
+  { from: "Екатеринбург", to: "Тюмень", price: 900, seats: 3, time: "13:00", date: "Сегодня", driver: "Сергей П.", rating: 4.7, car: "Ford Focus • У789ГД" },
+  { from: "Новосибирск", to: "Томск", price: 750, seats: 2, time: "15:00", date: "Сегодня", driver: "Анна В.", rating: 5.0, car: "Renault Logan • Х012ЕЖ" },
+  { from: "Краснодар", to: "Сочи", price: 650, seats: 4, time: "08:00", date: "Завтра", driver: "Михаил Т.", rating: 4.6, car: "Hyundai Tucson • З345ИК" },
+  { from: "Ростов-на-Дону", to: "Краснодар", price: 700, seats: 2, time: "10:00", date: "Сегодня", driver: "Павел Н.", rating: 4.8, car: "Toyota Corolla • Л678МН" },
+  { from: "Самара", to: "Казань", price: 950, seats: 3, time: "12:00", date: "Завтра", driver: "Юлия Ф.", rating: 4.9, car: "Nissan Almera • П901ОП" },
+  { from: "Уфа", to: "Пермь", price: 1050, seats: 2, time: "07:00", date: "Сегодня", driver: "Тимур Б.", rating: 4.7, car: "Chevrolet Cruze • Р234РС" },
+  { from: "Пермь", to: "Екатеринбург", price: 1100, seats: 1, time: "09:30", date: "Сегодня", driver: "Надежда С.", rating: 4.8, car: "Mazda 6 • Т567ТУ" },
+  { from: "Омск", to: "Новосибирск", price: 1300, seats: 3, time: "06:00", date: "Завтра", driver: "Виктор З.", rating: 4.6, car: "Kia Ceed • У890УФ" },
 ];
 
 export default function SearchPage({ role }: SearchPageProps) {
@@ -21,6 +32,7 @@ export default function SearchPage({ role }: SearchPageProps) {
   const [offerIdx, setOfferIdx] = useState<number | null>(null);
   const [offerPrice, setOfferPrice] = useState("");
   const [sortBy, setSortBy] = useState<"price" | "rating" | "time">("time");
+  const [searched, setSearched] = useState(false);
 
   const filtered = allRoutes
     .filter((r) => {
@@ -35,28 +47,41 @@ export default function SearchPage({ role }: SearchPageProps) {
       return a.time.localeCompare(b.time);
     });
 
+  const swap = () => { const tmp = from; setFrom(to); setTo(tmp); };
+
   return (
     <div className="px-4 pt-2 space-y-4">
       {/* Search form */}
       <div className="card-glass rounded-3xl p-4 space-y-3">
-        <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-4 py-3">
-          <div className="w-2 h-2 rounded-full bg-green-400" />
-          <input
+        <div className="relative">
+          <CityInput
             value={from}
-            onChange={(e) => setFrom(e.target.value)}
+            onChange={setFrom}
             placeholder="Откуда"
-            className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-sm"
+            icon={<div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />}
           />
         </div>
-        <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-4 py-3">
-          <Icon name="MapPin" size={14} style={{ color: "#FF6B1A" }} />
-          <input
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            placeholder="Куда"
-            className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-sm"
-          />
+
+        {/* Swap button */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
+          <button
+            onClick={swap}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:bg-white/10"
+            style={{ background: "rgba(255,107,26,0.12)", border: "1px solid rgba(255,107,26,0.2)" }}
+          >
+            <Icon name="ArrowUpDown" size={14} style={{ color: "#FF6B1A" }} />
+          </button>
+          <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
         </div>
+
+        <CityInput
+          value={to}
+          onChange={setTo}
+          placeholder="Куда"
+          icon={<Icon name="MapPin" size={14} style={{ color: "#FF6B1A" }} />}
+        />
+
         {role === "passenger" && (
           <div className="flex items-center gap-3 bg-white/5 rounded-2xl px-4 py-3">
             <Icon name="Tag" size={14} className="text-white/40" />
@@ -69,7 +94,11 @@ export default function SearchPage({ role }: SearchPageProps) {
             />
           </div>
         )}
-        <button className="btn-gradient w-full py-3 rounded-2xl text-white font-semibold text-sm">
+
+        <button
+          onClick={() => setSearched(true)}
+          className="btn-gradient w-full py-3 rounded-2xl text-white font-semibold text-sm"
+        >
           Найти маршруты
         </button>
       </div>
@@ -93,10 +122,17 @@ export default function SearchPage({ role }: SearchPageProps) {
 
       {/* Results */}
       <div className="space-y-3">
-        {filtered.length === 0 ? (
+        {!searched && !from && !to ? (
+          <div className="text-center py-10 text-white/30">
+            <Icon name="MapPin" size={36} className="mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Введи города для поиска маршрутов</p>
+            <p className="text-xs mt-1 opacity-60">Более 1 100 городов России</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-white/30">
             <Icon name="SearchX" size={40} className="mx-auto mb-3 opacity-40" />
             <p>Маршруты не найдены</p>
+            <p className="text-xs mt-1 opacity-60">Попробуй другие города</p>
           </div>
         ) : (
           filtered.map((ride, i) => (
